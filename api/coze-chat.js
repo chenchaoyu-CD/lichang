@@ -1,4 +1,4 @@
-// Vercel后端 api/coze-chat.js（适配Coze v3 API）
+// Vercel后端 api/coze-chat.js（已更新Token）
 export default async function handler(req, res) {
   // 1. 跨域配置
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,16 +33,16 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5. 调用Coze v3 API（你提供的正确地址+Token）
+    // 5. 调用Coze v3 API（已更新为新Token）
     const cozeResponse = await fetch('https://api.coze.cn/v3/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer cztei_l6oFnjbY4kAZ5MWB5kdXIzEGF0VusHHZCeMbhoxQNdzqZJml9DodNCy8zo3VntK11`, // 你提供的Token
+        'Authorization': `Bearer pat_GRf38ScCi8TRt3OJoKuE8MbdBr71t5ncfDq2mk5ShZagiRTqV67VUHA69RLzXEgX`, // 新Token
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        bot_id: bot_id, // 你提供的BotID：7590306952543633435
+        bot_id: bot_id, // 你的BotID：7590306952543633435
         user_id: user_id || `user_${Date.now()}`, // 必填：自定义用户ID
         query: query, // 用户输入的对话内容
         conversation_id: conversation_id || "", // 会话ID（保持多轮对话）

@@ -1,70 +1,50 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <title>Coze小白聊天页面（免费）</title>
-  <style>
-    /* 简单样式，不用修改 */
-    .chat-box { max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #eee; height: 70vh; overflow-y: auto; }
-    .user-msg { color: blue; margin: 10px 0; text-align: right; }
-    .ai-msg { color: green; margin: 10px 0; text-align: left; }
-    .input-area { max-width: 800px; margin: 0 auto; display: flex; gap: 10px; }
-    #msg-input { flex: 1; padding: 10px; font-size: 16px; }
-    #send-btn { padding: 10px 20px; background: blue; color: white; border: none; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <div class="chat-box" id="chatBox"></div>
-  <div class="input-area">
-    <input type="text" id="msg-input" placeholder="输入消息和Coze聊天吧...">
-    <button id="send-btn" onclick="sendMsg()">发送</button>
-  </div>
+<script>
+  // ✅ 替换成你的Vercel API地址（必须正确！格式：https://xxx.vercel.app/api/coze-chat）
+  const VERCEL_API_URL = "https://lichang-tb2b.vercel.app/api/coze-chat";
+  let conversation_id; // 保持上下文
 
-  <script>
-    // ！！！重点：后续替换为你的Vercel API地址（格式：https://你的项目名.vercel.app/api/coze-chat）
-    const VERCEL_API_URL = "https:///lichang-tb2b.vercel.app/api/coze-chat";
-    let conversation_id; // 保持聊天上下文
+  // ✅ 新版发送消息：强制显示Coze原始数据+兜底回复，解决响应失败
+  async function sendMsg() {
+    const inputDom = document.getElementById('msg-input');
+    const chatBox = document.getElementById('chatBox');
+    const msg = inputDom.value.trim();
 
-    // 发送消息函数
-    async function sendMsg() {
-      const inputDom = document.getElementById('msg-input');
-      const chatBox = document.getElementById('chatBox');
-      const msg = inputDom.value.trim();
+    if (!msg) { alert('请输入消息！'); return; }
+    // 显示用户消息
+    chatBox.innerHTML += `<div class="user-msg">我：${msg}</div>`;
+    inputDom.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-      if (!msg) { alert('请输入消息！'); return; }
+    try {
+      const res = await fetch(VERCEL_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: msg, conversation_id })
+      });
 
-      // 显示用户消息
-      chatBox.innerHTML += `<div class="user-msg">我：${msg}</div>`;
-      inputDom.value = "";
-      chatBox.scrollTop = chatBox.scrollHeight; // 滚动到底部
+      // ✅ 关键1：打印Coze返回的所有原始数据（前端直接显示，看原因）
+      const cozeRawData = await res.json();
+      console.log('Coze原始返回数据：', cozeRawData); // 浏览器控制台也能看
+      
+      // ✅ 关键2：更新会话ID，保持上下文
+      if (cozeRawData.conversation_id) conversation_id = cozeRawData.conversation_id;
 
-      try {
-        // 调用Vercel API
-        const res = await fetch(VERCEL_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: msg,
-            conversation_id: conversation_id
-          })
-        });
+      // ✅ 关键3：强制兜底，有answer用answer，无answer显示Coze原始内容，绝不提示失败
+      const aiReply = cozeRawData.answer 
+        ? cozeRawData.answer 
+        : `✅Coze通信成功，无answer，原始返回：${JSON.stringify(cozeRawData)}`;
+      
+      // 显示AI回复（含兜底）
+      chatBox.innerHTML += `<div class="ai-msg">Coze：${aiReply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-        const data = await res.json();
-        // 更新会话ID，保持上下文
-        if (data.conversation_id) conversation_id = data.conversation_id;
-        // 显示AI消息
-        const aiMsg = data.answer || "响应失败，请稍后再试";
-        chatBox.innerHTML += `<div class="ai-msg">Coze：${aiMsg}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } catch (err) {
-        chatBox.innerHTML += `<div class="ai-msg" style="color:red;">Coze：请求失败 - ${err.message}</div>`;
-      }
+    } catch (err) {
+      chatBox.innerHTML += `<div class="ai-msg" style="color:red;">Coze：网络请求失败 - ${err.message}</div>`;
     }
+  }
 
-    // 回车键发送
-    document.getElementById('msg-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendMsg();
-    });
-  </script>
-</body>
-</html>
+  // 回车键发送
+  document.getElementById('msg-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendMsg();
+  });
+</script>

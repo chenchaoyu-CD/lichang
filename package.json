@@ -1,5 +1,4 @@
 {
-  "type": "module"
   "name": "coze-chat-free",
   "version": "1.0.0",
   "description": "小白专用Coze+Vercel对接项目",

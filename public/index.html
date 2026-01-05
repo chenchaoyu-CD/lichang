@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>lichang-tb2b - AI赋能的思辨力训练平台</title>
+    <title>立场魔方 - AI赋能的思辨力训练平台</title>
     <style>
         * {
             margin: 0;
@@ -80,6 +80,8 @@
             text-decoration: none;
             font-weight: bold;
             transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            display: inline-block;
         }
 
         .cta-button:hover {
@@ -151,6 +153,7 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
         }
 
         .hero-button:hover {
@@ -494,26 +497,26 @@
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">🎲 lichang-tb2b</div>
+            <div class="logo">🎲 立场魔方</div>
             <div class="nav-links">
                 <a href="#features">核心功能</a>
                 <a href="#voice">语音功能</a>
                 <a href="#how-to-use">使用指南</a>
                 <a href="#faq">常见问题</a>
             </div>
-            <a href="debate_web.html" class="cta-button">立即开始</a>
+            <span class="cta-button">立即开始</span>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>🎲 lichang-tb2b</h1>
+            <h1>🎲 立场魔方</h1>
             <p class="subtitle">AI赋能的思辨力"健身房" - 提升批判性思维，掌握多元视角</p>
             <div class="hero-buttons">
-                <a href="debate_web.html" class="hero-button">
+                <span class="hero-button">
                     🚀 立即开始训练
-                </a>
+                </span>
                 <a href="#how-to-use" class="hero-button secondary">
                     📖 了解使用方法
                 </a>
@@ -573,9 +576,9 @@
                     <li>自然流畅的对话体验</li>
                     <li>高质量语音合成技术</li>
                 </ul>
-                <a href="debate_web.html" class="hero-button" style="margin-top: 30px;">
+                <span class="hero-button" style="margin-top: 30px;">
                     🎙️ 体验语音功能
-                </a>
+                </span>
             </div>
             <div class="voice-visual">
                 <div class="voice-icons">
@@ -623,13 +626,13 @@
     <section class="faq" id="faq">
         <div class="section-title">
             <h2>❓ 常见问题</h2>
-            <p>解答你关于lichang-tb2b的疑问</p>
+            <p>解答你关于立场魔方的疑问</p>
         </div>
         <div class="faq-container">
             <div class="faq-item">
-                <div class="faq-question">什么是lichang-tb2b？</div>
+                <div class="faq-question">什么是立场魔方？</div>
                 <div class="faq-answer">
-                    lichang-tb2b是一个AI赋能的思辨训练平台，通过角色扮演、多维分析、实时反馈等方式，帮助用户提升批判性思维能力和多元视角理解能力。
+                    立场魔方是一个AI赋能的思辨训练平台，通过角色扮演、多维分析、实时反馈等方式，帮助用户提升批判性思维能力和多元视角理解能力。
                 </div>
             </div>
             <div class="faq-item">
@@ -661,59 +664,13 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2025 lichang-tb2b - AI赋能的思辨力训练平台</p>
-        <p>让我们一起成为更好的思考者</p>
+        <p>© 2023 立场魔方 - AI赋能的思辨力训练平台</p>
         <div class="footer-links">
-            <a href="voice_usage_guide.md">语音功能指南</a>
-            <a href="VOICE_UI_GUIDE.md">界面位置说明</a>
-            <a href="DEMO_SCRIPT.md">功能演示脚本</a>
-            <a href="README.md">使用说明</a>
-        </div>
-        <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <p style="margin-bottom: 15px; font-weight: bold;">🚀 快速访问</p>
-            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <a href="debate_web.html" class="hero-button" style="font-size: 13px; padding: 10px 20px;">
-                    🎭 使用lichang-tb2b
-                </a>
-                <a href="coze_agent.html" class="hero-button secondary" style="font-size: 13px; padding: 10px 20px;">
-                    🤖 Coze 智能体对接
-                </a>
-            </div>
+            <a href="#">关于我们</a>
+            <a href="#">隐私政策</a>
+            <a href="#">使用条款</a>
+            <a href="#">联系我们</a>
         </div>
     </footer>
-
-    <script>
-        // FAQ Toggle
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const faqItem = question.parentElement;
-                const isActive = faqItem.classList.contains('active');
-
-                // 关闭所有FAQ项
-                document.querySelectorAll('.faq-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-
-                // 如果之前未打开，则打开当前项
-                if (!isActive) {
-                    faqItem.classList.add('active');
-                }
-            });
-        });
-
-        // Smooth Scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>

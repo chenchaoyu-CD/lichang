@@ -1,0 +1,15 @@
+{
+  "name": "coze-chat-free",
+  "version": "1.0.0",
+  "description": "小白专用Coze+Vercel对接项目",
+  "main": "index.js",
+  "scripts": {
+    "start": "node api/coze-chat.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

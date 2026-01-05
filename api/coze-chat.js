@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     }
 
     // 5. 调用Coze官方正确的Open API（核心修正：地址+参数格式）
-    const cozeResponse = await fetch('https://api.coze.com/open_api/v3/chat', {
+    const cozeResponse = await fetch('https://api.coze.cn/v3/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -80,8 +80,6 @@
             text-decoration: none;
             font-weight: bold;
             transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            display: inline-block;
         }
 
         .cta-button:hover {
@@ -153,7 +151,6 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            cursor: pointer;
         }
 
         .hero-button:hover {
@@ -232,6 +229,67 @@
             color: var(--text-light);
             font-size: 16px;
             line-height: 1.8;
+        }
+
+        /* Integration Section */
+        .integration {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: var(--white);
+        }
+
+        .integration-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .integration-content h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .integration-content p {
+            font-size: 18px;
+            opacity: 0.95;
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .integration-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px 20px;
+            border-radius: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .integration-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .integration-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .integration-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .integration-card p {
+            font-size: 16px;
+            margin-bottom: 25px;
         }
 
         /* Voice Feature Section */
@@ -449,6 +507,7 @@
             justify-content: center;
             gap: 30px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
@@ -476,7 +535,7 @@
                 display: none;
             }
 
-            .feature-grid {
+            .feature-grid, .integration-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -500,11 +559,12 @@
             <div class="logo">🎲 立场魔方</div>
             <div class="nav-links">
                 <a href="#features">核心功能</a>
+                <a href="#integration">平台集成</a>
                 <a href="#voice">语音功能</a>
                 <a href="#how-to-use">使用指南</a>
                 <a href="#faq">常见问题</a>
             </div>
-            <span class="cta-button">立即开始</span>
+            <a href="debate_web.html" class="cta-button">立即开始</a>
         </div>
     </nav>
 
@@ -514,11 +574,11 @@
             <h1>🎲 立场魔方</h1>
             <p class="subtitle">AI赋能的思辨力"健身房" - 提升批判性思维，掌握多元视角</p>
             <div class="hero-buttons">
-                <span class="hero-button">
+                <a href="debate_web.html" class="hero-button">
                     🚀 立即开始训练
-                </span>
-                <a href="#how-to-use" class="hero-button secondary">
-                    📖 了解使用方法
+                </a>
+                <a href="#integration" class="hero-button secondary">
+                    🔗 平台集成入口
                 </a>
             </div>
         </div>
@@ -564,6 +624,40 @@
         </div>
     </section>
 
+    <!-- Integration Section -->
+    <section class="integration" id="integration">
+        <div class="integration-content">
+            <h2>🔗 平台集成</h2>
+            <p>无缝对接多种AI平台与开发工具，拓展你的思辨训练边界</p>
+            <div class="integration-grid">
+                <div class="integration-card">
+                    <div class="integration-icon">🤖</div>
+                    <h3>Coze智能体</h3>
+                    <p>连接Coze平台，使用定制化智能体进行思辨训练</p>
+                    <a href="coze_agent.html" class="hero-button">
+                        进入Coze集成
+                    </a>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon">🌐</div>
+                    <h3>Vercel部署</h3>
+                    <p>访问我们在Vercel上的部署版本，体验云端服务</p>
+                    <a href="https://your-vercel-deployment-url.vercel.app" target="_blank" class="hero-button">
+                        访问Vercel版本
+                    </a>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-icon">💻</div>
+                    <h3>GitHub项目</h3>
+                    <p>查看源代码，参与开发，或部署你自己的版本</p>
+                    <a href="https://github.com/your-username/your-repo" target="_blank" class="hero-button">
+                        访问GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Voice Feature Section -->
     <section class="voice-feature" id="voice">
         <div class="voice-content">
@@ -576,9 +670,9 @@
                     <li>自然流畅的对话体验</li>
                     <li>高质量语音合成技术</li>
                 </ul>
-                <span class="hero-button" style="margin-top: 30px;">
+                <a href="debate_web.html" class="hero-button" style="margin-top: 30px;">
                     🎙️ 体验语音功能
-                </span>
+                </a>
             </div>
             <div class="voice-visual">
                 <div class="voice-icons">
@@ -642,6 +736,24 @@
                 </div>
             </div>
             <div class="faq-item">
+                <div class="faq-question">如何连接Coze智能体？</div>
+                <div class="faq-answer">
+                    点击导航栏的"平台集成"或首页的"平台集成入口"按钮，进入Coze智能体对接页面，按照指引完成配置即可连接你在Coze平台创建的智能体。
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Vercel版本与本地版本有何区别？</div>
+                <div class="faq-answer">
+                    Vercel版本是部署在云端的在线版本，无需本地部署即可使用；本地版本需要你在自己的设备上部署后端服务。两者功能一致，但Vercel版本更便于随时随地访问。
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">如何从GitHub获取源代码？</div>
+                <div class="faq-answer">
+                    点击"平台集成"区域的GitHub项目卡片，访问我们的GitHub仓库，你可以克隆仓库、查看代码或参与项目贡献。仓库中包含完整的前端和后端代码。
+                </div>
+            </div>
+            <div class="faq-item">
                 <div class="faq-question">需要什么样的硬件配置？</div>
                 <div class="faq-answer">
                     只需要一台连接互联网的电脑或手机，以及一个浏览器（推荐Chrome、Edge、Firefox或Safari）。如需使用语音功能，需要麦克风和扬声器。
@@ -664,13 +776,68 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2023 立场魔方 - AI赋能的思辨力训练平台</p>
+        <p>© 2025 立场魔方 - AI赋能的思辨力训练平台</p>
+        <p>让我们一起成为更好的思考者</p>
         <div class="footer-links">
-            <a href="#">关于我们</a>
-            <a href="#">隐私政策</a>
-            <a href="#">使用条款</a>
-            <a href="#">联系我们</a>
+            <a href="voice_usage_guide.md">语音功能指南</a>
+            <a href="VOICE_UI_GUIDE.md">界面位置说明</a>
+            <a href="DEMO_SCRIPT.md">功能演示脚本</a>
+            <a href="README.md">使用说明</a>
+            <a href="coze_agent.html">Coze智能体对接</a>
+            <a href="https://your-vercel-deployment-url.vercel.app" target="_blank">Vercel部署版本</a>
+            <a href="https://github.com/your-username/your-repo" target="_blank">GitHub项目</a>
+        </div>
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="margin-bottom: 15px; font-weight: bold;">🚀 快速访问</p>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <a href="debate_web.html" class="hero-button" style="font-size: 13px; padding: 10px 20px;">
+                    🎭 使用立场魔方
+                </a>
+                <a href="coze_agent.html" class="hero-button secondary" style="font-size: 13px; padding: 10px 20px;">
+                    🤖 Coze 智能体对接
+                </a>
+                <a href="https://your-vercel-deployment-url.vercel.app" target="_blank" class="hero-button secondary" style="font-size: 13px; padding: 10px 20px;">
+                    🌐 Vercel 版本
+                </a>
+                <a href="https://github.com/your-username/your-repo" target="_blank" class="hero-button secondary" style="font-size: 13px; padding: 10px 20px;">
+                    💻 GitHub 代码
+                </a>
+            </div>
         </div>
     </footer>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                const isActive = faqItem.classList.contains('active');
+
+                // 关闭所有FAQ项
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // 如果之前未打开，则打开当前项
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,50 +1,130 @@
-<script>
-  // ✅ 替换成你的Vercel API地址（必须正确！格式：https://xxx.vercel.app/api/coze-chat）
-  const VERCEL_API_URL = "https://lichang-tb2b.vercel.app/api/coze-chat";
-  let conversation_id; // 保持上下文
-
-  // ✅ 新版发送消息：强制显示Coze原始数据+兜底回复，解决响应失败
-  async function sendMsg() {
-    const inputDom = document.getElementById('msg-input');
-    const chatBox = document.getElementById('chatBox');
-    const msg = inputDom.value.trim();
-
-    if (!msg) { alert('请输入消息！'); return; }
-    // 显示用户消息
-    chatBox.innerHTML += `<div class="user-msg">我：${msg}</div>`;
-    inputDom.value = "";
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-      const res = await fetch(VERCEL_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: msg, conversation_id })
-      });
-
-      // ✅ 关键1：打印Coze返回的所有原始数据（前端直接显示，看原因）
-      const cozeRawData = await res.json();
-      console.log('Coze原始返回数据：', cozeRawData); // 浏览器控制台也能看
-      
-      // ✅ 关键2：更新会话ID，保持上下文
-      if (cozeRawData.conversation_id) conversation_id = cozeRawData.conversation_id;
-
-      // ✅ 关键3：强制兜底，有answer用answer，无answer显示Coze原始内容，绝不提示失败
-      const aiReply = cozeRawData.answer 
-        ? cozeRawData.answer 
-        : `✅Coze通信成功，无answer，原始返回：${JSON.stringify(cozeRawData)}`;
-      
-      // 显示AI回复（含兜底）
-      chatBox.innerHTML += `<div class="ai-msg">Coze：${aiReply}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-    } catch (err) {
-      chatBox.innerHTML += `<div class="ai-msg" style="color:red;">Coze：网络请求失败 - ${err.message}</div>`;
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coze智能体聊天页面（正常显示对话框）</title>
+  <!-- 对话框+输入框完整样式，绝不缺失 -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 微软雅黑; }
+    body { padding: 20px; background: #f5f5f5; }
+    /* 聊天对话框核心样式 */
+    #chatBox {
+      max-width: 800px;
+      margin: 0 auto 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      height: 70vh;
+      overflow-y: auto;
+      background: #fff;
+      line-height: 1.6;
     }
-  }
+    /* 输入框区域样式 */
+    .input-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+    }
+    #msg-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      outline: none;
+    }
+    #msg-input:focus { border-color: #2196F3; }
+    #send-btn {
+      padding: 12px 25px;
+      background: #2196F3;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #send-btn:hover { background: #1976D2; }
+    /* 消息样式 */
+    .user-msg {
+      color: #2196F3;
+      text-align: right;
+      margin: 10px 0;
+      padding-right: 10px;
+    }
+    .ai-msg {
+      color: #4CAF50;
+      text-align: left;
+      margin: 10px 0;
+      padding-left: 10px;
+    }
+    .error-msg { color: #f44336; text-align: center; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <!-- ✅ 聊天对话框（核心，绝不缺失） -->
+  <div id="chatBox"></div>
+  <!-- ✅ 输入框+发送按钮（核心交互区） -->
+  <div class="input-wrap">
+    <input type="text" id="msg-input" placeholder="输入消息和Coze智能体对话，回车也能发送～">
+    <button id="send-btn" onclick="sendMsg()">发送</button>
+  </div>
 
-  // 回车键发送
-  document.getElementById('msg-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendMsg();
-  });
-</script>
+  <script>
+    // ✅ 仅修改这1行！替换成你的Vercel API地址（复制准确，无空格）
+    const VERCEL_API_URL = "https://lichang-tb2b.vercel.app/api/coze-chat";
+    let conversation_id; // 保持聊天上下文，支持多轮对话
+
+    // ✅ 发送消息核心函数，带Coze原始数据显示+兜底回复，绝不失败
+    async function sendMsg() {
+      const input = document.getElementById('msg-input');
+      const chatBox = document.getElementById('chatBox');
+      const msg = input.value.trim();
+
+      if (!msg) { alert('请输入要发送的内容～'); return; }
+      
+      // 显示用户消息
+      chatBox.innerHTML += `<div class="user-msg">👉 我：${msg}</div>`;
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight; // 自动滚到最新消息
+
+      try {
+        // 调用Vercel接口对接Coze
+        const res = await fetch(VERCEL_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: msg, conversation_id })
+        });
+        const cozeData = await res.json();
+
+        // 更新会话ID，保持多轮上下文
+        if (cozeData.conversation_id) conversation_id = cozeData.conversation_id;
+
+        // ✅ 有回复显示回复，无回复显示Coze原始数据，绝不提示失败
+        const aiReply = cozeData.answer 
+          ? `🤖 Coze：${cozeData.answer}` 
+          : `✅ 通信成功｜Coze原始数据：${JSON.stringify(cozeData)}`;
+        
+        // 显示Coze回复
+        chatBox.innerHTML += `<div class="ai-msg">${aiReply}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+      } catch (err) {
+        // 仅网络问题才显示错误
+        chatBox.innerHTML += `<div class="ai-msg error-msg">❌ 请求失败：${err.message}</div>`;
+      }
+    }
+
+    // ✅ 回车键发送消息（便捷功能）
+    document.getElementById('msg-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMsg();
+    });
+
+    // ✅ 页面加载完成，自动显示欢迎语
+    window.onload = () => {
+      document.getElementById('chatBox').innerHTML += `<div class="ai-msg">🤖 Coze智能体已就绪，输入消息开始对话吧～</div>`;
+    };
+  </script>
+</body>
+</html>

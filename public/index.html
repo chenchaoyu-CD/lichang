@@ -288,6 +288,18 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
+        /* 新增：原始数据提示样式，方便调试 */
+        .raw-data-message {
+            margin: 10px auto;
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            max-width: 90%;
+            box-shadow: none;
+        }
+
         .chat-input-area {
             padding: 20px 30px;
             background: var(--white);
@@ -850,36 +862,56 @@
                         query: message,
                         conversation_id: conversation_id || "",
                         bot_id: COZE_BOT_ID,
-                        user_id: "user_"+new Date().getTime() // 新增：Coze必填user_id
+                        user_id: "user_" + new Date().getTime() // Coze必填user_id
                     })
                 });
 
-                // 打印响应数据到控制台，方便排查问题（关键调试步骤）
-                console.log("Vercel接口响应状态：", response.status);
+                // 1. 强化调试：打印完整响应信息（F12控制台可查看）
+                console.log("=== 完整响应信息 ===");
+                console.log("响应状态码：", response.status);
+                console.log("响应状态文本：", response.statusText);
                 const data = await response.json();
-                console.log("Vercel接口返回数据：", data);
+                console.log("后端返回完整数据：", JSON.stringify(data, null, 2)); // 格式化打印，更易读
+                console.log("====================");
 
                 // 更新会话ID，保持上下文
                 if (data.conversation_id) {
                     conversation_id = data.conversation_id;
                 }
 
-                // 优化：兼容Coze返回格式，多维度提取有效回复
+                // 2. 临时显示后端原始数据在聊天窗口（方便你直观查看，后续可删除）
+                appendRawData(JSON.stringify(data, null, 2));
+
+                // 3. 超兼容：穷尽所有可能的有效回复字段，避免兜底
                 let aiMessage = "抱歉，我暂时无法提供相关回应，请尝试其他话题。";
-                // 情况1：后端已处理，直接返回answer
+                // 场景1：后端返回answer（常规情况）
                 if (data.answer && data.answer.trim() !== "") {
                     aiMessage = data.answer;
                 }
-                // 情况2：后端直接返回Coze原始数据，提取assistant消息
+                // 场景2：后端返回Coze原始messages数组
                 else if (data.messages && Array.isArray(data.messages)) {
-                    const botMsg = data.messages.find(msg => msg.role === "assistant");
+                    const botMsg = data.messages.find(msg => msg.role === "assistant" || msg.role === "bot");
                     if (botMsg && botMsg.content && botMsg.content.trim() !== "") {
                         aiMessage = botMsg.content;
                     }
+                    // 兼容Coze流式返回/嵌套内容
+                    else if (botMsg && botMsg.payload && botMsg.payload.content && botMsg.payload.content.trim() !== "") {
+                        aiMessage = botMsg.payload.content;
+                    }
                 }
-                // 情况3：后端返回其他字段（如response）
-                else if (data.response && data.response.trim() !== "") {
-                    aiMessage = data.response;
+                // 场景3：后端返回其他自定义字段（reply/result/msg等）
+                else if (data.reply && data.reply.trim() !== "") {
+                    aiMessage = data.reply;
+                }
+                else if (data.result && data.result.trim() !== "") {
+                    aiMessage = data.result;
+                }
+                else if (data.msg && data.msg.trim() !== "") {
+                    aiMessage = data.msg;
+                }
+                // 场景4：后端返回错误信息，优先显示错误（方便排查）
+                else if (data.error && data.error.trim() !== "") {
+                    aiMessage = "【后端错误提示】：" + data.error + (data.message ? " - " + data.message : "");
                 }
 
                 // 显示AI回复
@@ -887,16 +919,28 @@
 
             } catch (error) {
                 console.error('发送消息失败（网络/接口错误）:', error);
-                appendMessage('ai', "抱歉，服务暂时出现异常，请稍后再试。");
+                appendMessage('ai', "【网络/接口异常】：" + error.message);
+                // 显示错误详情
+                appendRawData("错误详情：" + JSON.stringify(error, null, 2));
             }
         }
 
-        // 追加消息到聊天窗口
+        // 追加普通消息到聊天窗口
         function appendMessage(sender, content) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
             messageDiv.textContent = content;
             chatMessages.appendChild(messageDiv);
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 新增：追加后端原始数据到聊天窗口（调试专用）
+        function appendRawData(content) {
+            const dataDiv = document.createElement('div');
+            dataDiv.className = "message raw-data-message";
+            dataDiv.textContent = "【后端原始数据】：" + content;
+            chatMessages.appendChild(dataDiv);
             // 滚动到底部
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }

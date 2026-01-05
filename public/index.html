@@ -785,7 +785,8 @@
                     我们的AI助手基于Coze智能体开发，通过Vercel平台部署，具备强大的自然语言理解和逻辑推理能力。它会根据你的输入，从多个立场和角度进行分析回应，帮助你全面思考问题。
                 </div>
             </div>
-            <div class="faq-question">对话数据会被保存吗？</div>
+            <div class="faq-item">
+                <div class="faq-question">对话数据会被保存吗？</div>
                 <div class="faq-answer">
                     当前版本支持短期记忆功能，系统会保留最近20轮对话记录以提供连贯的对话体验。我们重视用户隐私，所有对话数据仅用于提供服务，不会泄露给第三方。你可以随时刷新页面开始新的对话。
                 </div>
@@ -847,24 +848,45 @@
                     },
                     body: JSON.stringify({
                         query: message,
-                        conversation_id: conversation_id,
-                        bot_id: COZE_BOT_ID
+                        conversation_id: conversation_id || "",
+                        bot_id: COZE_BOT_ID,
+                        user_id: "user_"+new Date().getTime() // 新增：Coze必填user_id
                     })
                 });
 
+                // 打印响应数据到控制台，方便排查问题（关键调试步骤）
+                console.log("Vercel接口响应状态：", response.status);
                 const data = await response.json();
-                
+                console.log("Vercel接口返回数据：", data);
+
                 // 更新会话ID，保持上下文
                 if (data.conversation_id) {
                     conversation_id = data.conversation_id;
                 }
 
+                // 优化：兼容Coze返回格式，多维度提取有效回复
+                let aiMessage = "抱歉，我暂时无法提供相关回应，请尝试其他话题。";
+                // 情况1：后端已处理，直接返回answer
+                if (data.answer && data.answer.trim() !== "") {
+                    aiMessage = data.answer;
+                }
+                // 情况2：后端直接返回Coze原始数据，提取assistant消息
+                else if (data.messages && Array.isArray(data.messages)) {
+                    const botMsg = data.messages.find(msg => msg.role === "assistant");
+                    if (botMsg && botMsg.content && botMsg.content.trim() !== "") {
+                        aiMessage = botMsg.content;
+                    }
+                }
+                // 情况3：后端返回其他字段（如response）
+                else if (data.response && data.response.trim() !== "") {
+                    aiMessage = data.response;
+                }
+
                 // 显示AI回复
-                const aiMessage = data.answer || "抱歉，我暂时无法提供相关回应，请尝试其他话题。";
                 appendMessage('ai', aiMessage);
 
             } catch (error) {
-                console.error('发送消息失败:', error);
+                console.error('发送消息失败（网络/接口错误）:', error);
                 appendMessage('ai', "抱歉，服务暂时出现异常，请稍后再试。");
             }
         }

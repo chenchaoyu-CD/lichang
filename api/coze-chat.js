@@ -1,4 +1,4 @@
-// Vercel后端 api/coze-chat.js（已更新Token）
+// Vercel后端 api/coze-chat.js（适配Coze v3异步轮询）
 export default async function handler(req, res) {
   // 1. 跨域配置
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,54 +33,95 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5. 调用Coze v3 API（已更新为新Token）
-    const cozeResponse = await fetch('https://api.coze.cn/v3/chat', {
+    // 5. 第一步：调用Coze v3 chat接口（触发对话）
+    const cozeChatResponse = await fetch('https://api.coze.cn/v3/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer pat_GRf38ScCi8TRt3OJoKuE8MbdBr71t5ncfDq2mk5ShZagiRTqV67VUHA69RLzXEgX`, // 新Token
+        'Authorization': `Bearer pat_GRf38ScCi8TRt3OJoKuE8MbdBr71t5ncfDq2mk5ShZagiRTqV67VUHA69RLzXEgX`,
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        bot_id: bot_id, // 你的BotID：7590306952543633435
-        user_id: user_id || `user_${Date.now()}`, // 必填：自定义用户ID
-        query: query, // 用户输入的对话内容
-        conversation_id: conversation_id || "", // 会话ID（保持多轮对话）
-        stream: false // 非流式响应（前端易处理）
+        bot_id: bot_id,
+        user_id: user_id || `user_${Date.now()}`,
+        query: query,
+        conversation_id: conversation_id || "",
+        stream: false
       })
     });
 
-    // 6. 解析Coze v3返回的原始数据
-    const cozeData = await cozeResponse.json();
-    console.log("Coze v3 API返回：", cozeData); // Vercel日志可查看
+    const cozeChatData = await cozeChatResponse.json();
+    console.log("Coze触发对话返回：", cozeChatData);
 
-    // 7. 提取有效回复（适配Coze v3返回格式）
+    // 6. 第二步：轮询获取对话结果（直到status=completed）
+    let cozeResultData = null;
+    let maxRetries = 10; // 最大轮询次数（避免无限循环）
+    let retryCount = 0;
+    const chatId = cozeChatData.data?.id; // 对话ID（用于轮询）
+    const newConversationId = cozeChatData.data?.conversation_id || "";
+
+    if (!chatId) {
+      return res.status(200).json({
+        answer: "抱歉，未获取到对话ID，无法获取回复",
+        conversation_id: newConversationId,
+        coze_raw_data: cozeChatData
+      });
+    }
+
+    // 轮询逻辑：每隔500ms请求一次，直到完成或达到最大次数
+    while (retryCount < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, 500)); // 等待500ms
+      retryCount++;
+
+      // 调用Coze v3获取对话结果接口
+      const resultResponse = await fetch(`https://api.coze.cn/v3/chat/retrieve?chat_id=${chatId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer pat_GRf38ScCi8TRt3OJoKuE8MbdBr71t5ncfDq2mk5ShZagiRTqV67VUHA69RLzXEgX`,
+          'Accept': 'application/json'
+        }
+      });
+
+      cozeResultData = await resultResponse.json();
+      console.log(`轮询第${retryCount}次：`, cozeResultData);
+
+      // 状态为completed，说明回复生成完成，退出轮询
+      if (cozeResultData.data?.status === "completed") {
+        break;
+      }
+
+      // 状态为failed，说明生成失败，退出轮询
+      if (cozeResultData.data?.status === "failed") {
+        break;
+      }
+    }
+
+    // 7. 提取有效回复
     let answer = "抱歉，我暂时无法提供相关回应，请尝试其他话题。";
-    let newConversationId = conversation_id || "";
 
-    // 正常情况：Coze v3返回的回复在 data.messages 中
-    if (cozeData && cozeData.code === 0 && cozeData.data) {
-      if (cozeData.data.messages && Array.isArray(cozeData.data.messages)) {
-        const botMsg = cozeData.data.messages.find(msg => msg.role === "assistant");
+    // 轮询成功且状态为completed
+    if (cozeResultData && cozeResultData.code === 0 && cozeResultData.data?.status === "completed") {
+      if (cozeResultData.data.messages && Array.isArray(cozeResultData.data.messages)) {
+        const botMsg = cozeResultData.data.messages.find(msg => msg.role === "assistant");
         if (botMsg && botMsg.content) {
           answer = botMsg.content;
         }
       }
-      // 获取Coze v3返回的会话ID（多轮对话用）
-      if (cozeData.data.conversation_id) {
-        newConversationId = cozeData.data.conversation_id;
-      }
     }
-    // 异常情况：显示Coze错误信息
-    else if (cozeData && cozeData.msg) {
-      answer = `Coze调用失败：${cozeData.msg}（错误码：${cozeData.code || '未知'}）`;
+    // 轮询失败（状态为failed）
+    else if (cozeResultData && cozeResultData.data?.status === "failed") {
+      answer = `Coze生成回复失败：${cozeResultData.data.last_error?.msg || '未知错误'}`;
+    }
+    // 轮询超时
+    else if (retryCount >= maxRetries) {
+      answer = "Coze回复生成超时，请稍后再试";
     }
 
     // 8. 返回给前端
     res.status(200).json({
       answer: answer,
       conversation_id: newConversationId,
-      coze_raw_data: cozeData
+      coze_raw_data: cozeResultData || cozeChatData
     });
 
   } catch (error) {

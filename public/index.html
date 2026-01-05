@@ -1,130 +1,719 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coze智能体聊天页面（正常显示对话框）</title>
-  <!-- 对话框+输入框完整样式，绝不缺失 -->
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 微软雅黑; }
-    body { padding: 20px; background: #f5f5f5; }
-    /* 聊天对话框核心样式 */
-    #chatBox {
-      max-width: 800px;
-      margin: 0 auto 20px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      height: 70vh;
-      overflow-y: auto;
-      background: #fff;
-      line-height: 1.6;
-    }
-    /* 输入框区域样式 */
-    .input-wrap {
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      gap: 10px;
-    }
-    #msg-input {
-      flex: 1;
-      padding: 12px 15px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 16px;
-      outline: none;
-    }
-    #msg-input:focus { border-color: #2196F3; }
-    #send-btn {
-      padding: 12px 25px;
-      background: #2196F3;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #send-btn:hover { background: #1976D2; }
-    /* 消息样式 */
-    .user-msg {
-      color: #2196F3;
-      text-align: right;
-      margin: 10px 0;
-      padding-right: 10px;
-    }
-    .ai-msg {
-      color: #4CAF50;
-      text-align: left;
-      margin: 10px 0;
-      padding-left: 10px;
-    }
-    .error-msg { color: #f44336; text-align: center; margin-top: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lichang-tb2b - AI赋能的思辨力训练平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--bg-light);
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            padding: 100px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero .subtitle {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-button {
+            background: var(--white);
+            color: var(--primary-color);
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-button.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 20px;
+            background: var(--white);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: var(--text-light);
+            font-size: 18px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--bg-light);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        /* Voice Feature Section */
+        .voice-feature {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: var(--white);
+        }
+
+        .voice-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .voice-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .voice-text h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .voice-text p {
+            font-size: 18px;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .voice-items {
+            list-style: none;
+        }
+
+        .voice-items li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .voice-items li::before {
+            content: '✓';
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .voice-visual {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .voice-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .voice-icon {
+            font-size: 60px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .voice-icon:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .voice-icon:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .voice-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* How to Use Section */
+        .how-to-use {
+            padding: 80px 20px;
+            background: var(--bg-light);
+        }
+
+        .steps-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 50px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .step-content p {
+            color: var(--text-light);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 80px 20px;
+            background: var(--white);
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px 25px;
+            background: var(--bg-light);
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: #edf2f7;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .faq-answer {
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 20px 25px;
+            max-height: 500px;
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '-';
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            opacity: 0.7;
+            margin-bottom: 15px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: var(--white);
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero .subtitle {
+                font-size: 16px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .step-number {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- ✅ 聊天对话框（核心，绝不缺失） -->
-  <div id="chatBox"></div>
-  <!-- ✅ 输入框+发送按钮（核心交互区） -->
-  <div class="input-wrap">
-    <input type="text" id="msg-input" placeholder="输入消息和Coze智能体对话，回车也能发送～">
-    <button id="send-btn" onclick="sendMsg()">发送</button>
-  </div>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎲 lichang-tb2b</div>
+            <div class="nav-links">
+                <a href="#features">核心功能</a>
+                <a href="#voice">语音功能</a>
+                <a href="#how-to-use">使用指南</a>
+                <a href="#faq">常见问题</a>
+            </div>
+            <a href="debate_web.html" class="cta-button">立即开始</a>
+        </div>
+    </nav>
 
-  <script>
-    // ✅ 仅修改这1行！替换成你的Vercel API地址（复制准确，无空格）
-    const VERCEL_API_URL = "https://lichang-tb2b.vercel.app/api/coze-chat";
-    let conversation_id; // 保持聊天上下文，支持多轮对话
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🎲 lichang-tb2b</h1>
+            <p class="subtitle">AI赋能的思辨力"健身房" - 提升批判性思维，掌握多元视角</p>
+            <div class="hero-buttons">
+                <a href="debate_web.html" class="hero-button">
+                    🚀 立即开始训练
+                </a>
+                <a href="#how-to-use" class="hero-button secondary">
+                    📖 了解使用方法
+                </a>
+            </div>
+        </div>
+    </section>
 
-    // ✅ 发送消息核心函数，带Coze原始数据显示+兜底回复，绝不失败
-    async function sendMsg() {
-      const input = document.getElementById('msg-input');
-      const chatBox = document.getElementById('chatBox');
-      const msg = input.value.trim();
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-title">
+            <h2>✨ 核心功能</h2>
+            <p>全方位的思辨训练工具，助你成为批判性思考者</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎭</div>
+                <h3>角色扮演攻防</h3>
+                <p>扮演不同立场角色，在辩论中锻炼反驳能力和观点切换技巧</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>多维立场分析</h3>
+                <p>从多个角度分析议题，建立全面、客观的思辨框架</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>实时能力评估</h3>
+                <p>即时反馈你的思辨能力，获得个性化成长建议</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>积分激励系统</h3>
+                <p>赚取积分和数字徽章，追踪你的成长轨迹</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎤</div>
+                <h3>语音交互体验</h3>
+                <p>支持语音输入和语音回复，让对话更加自然流畅</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3>AI智能助手</h3>
+                <p>专业的AI思辨导师，24小时在线，随时准备陪你训练</p>
+            </div>
+        </div>
+    </section>
 
-      if (!msg) { alert('请输入要发送的内容～'); return; }
-      
-      // 显示用户消息
-      chatBox.innerHTML += `<div class="user-msg">👉 我：${msg}</div>`;
-      input.value = '';
-      chatBox.scrollTop = chatBox.scrollHeight; // 自动滚到最新消息
+    <!-- Voice Feature Section -->
+    <section class="voice-feature" id="voice">
+        <div class="voice-content">
+            <div class="voice-text">
+                <h2>🎤 全新语音交互功能</h2>
+                <p>突破键盘限制，用声音表达你的观点。AI会用你喜欢的声音智能回复，让思辨训练更加自然、高效。</p>
+                <ul class="voice-items">
+                    <li>语音输入识别，解放双手</li>
+                    <li>AI语音回复，多音色选择</li>
+                    <li>自然流畅的对话体验</li>
+                    <li>高质量语音合成技术</li>
+                </ul>
+                <a href="debate_web.html" class="hero-button" style="margin-top: 30px;">
+                    🎙️ 体验语音功能
+                </a>
+            </div>
+            <div class="voice-visual">
+                <div class="voice-icons">
+                    <div class="voice-icon">🎤</div>
+                    <div class="voice-icon">🔊</div>
+                    <div class="voice-icon">🤖</div>
+                </div>
+                <p class="voice-label">语音输入 → AI理解 → 智能回复 → 语音播放</p>
+            </div>
+        </div>
+    </section>
 
-      try {
-        // 调用Vercel接口对接Coze
-        const res = await fetch(VERCEL_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: msg, conversation_id })
+    <!-- How to Use Section -->
+    <section class="how-to-use" id="how-to-use">
+        <div class="section-title">
+            <h2>📖 使用指南</h2>
+            <p>简单三步，开启你的思辨训练之旅</p>
+        </div>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>配置连接</h3>
+                    <p>在顶部配置区域输入API地址，点击"测试连接"确认服务可用。默认地址为 http://localhost:8000/api/agent/chat</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>选择功能</h3>
+                    <p>在"AI音色"下拉菜单中选择你喜欢的语音风格。你可以选择女声温柔、男声温和、女声专业、男声沉稳等4种音色。</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>开始训练</h3>
+                    <p>输入一个议题或观点开始训练。你可以使用文字输入，也可以点击🎤麦克风按钮使用语音输入。AI会立即回复，你可以播放AI的语音回复。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="section-title">
+            <h2>❓ 常见问题</h2>
+            <p>解答你关于lichang-tb2b的疑问</p>
+        </div>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">什么是lichang-tb2b？</div>
+                <div class="faq-answer">
+                    lichang-tb2b是一个AI赋能的思辨训练平台，通过角色扮演、多维分析、实时反馈等方式，帮助用户提升批判性思维能力和多元视角理解能力。
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">如何使用语音功能？</div>
+                <div class="faq-answer">
+                    点击输入框旁的🎤麦克风按钮开始录音，再次点击停止录音。系统会自动识别你的语音并填入输入框。AI回复后，会自动生成语音播放按钮，点击即可播放。
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">需要什么样的硬件配置？</div>
+                <div class="faq-answer">
+                    只需要一台连接互联网的电脑或手机，以及一个浏览器（推荐Chrome、Edge、Firefox或Safari）。如需使用语音功能，需要麦克风和扬声器。
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">API地址应该填什么？</div>
+                <div class="faq-answer">
+                    如果你在本地测试，使用默认地址 http://localhost:8000/api/agent/chat。如果要远程访问，需要将后端服务部署到云服务器或使用内网穿透工具，然后填写对应的公网地址。
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">我的对话会被保存吗？</div>
+                <div class="faq-answer">
+                    当前版本支持短期记忆功能，系统会保留最近20轮对话记录以提供连贯的对话体验。你可以点击"新建会话"按钮开始一个新的对话。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 lichang-tb2b - AI赋能的思辨力训练平台</p>
+        <p>让我们一起成为更好的思考者</p>
+        <div class="footer-links">
+            <a href="voice_usage_guide.md">语音功能指南</a>
+            <a href="VOICE_UI_GUIDE.md">界面位置说明</a>
+            <a href="DEMO_SCRIPT.md">功能演示脚本</a>
+            <a href="README.md">使用说明</a>
+        </div>
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="margin-bottom: 15px; font-weight: bold;">🚀 快速访问</p>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <a href="debate_web.html" class="hero-button" style="font-size: 13px; padding: 10px 20px;">
+                    🎭 使用lichang-tb2b
+                </a>
+                <a href="coze_agent.html" class="hero-button secondary" style="font-size: 13px; padding: 10px 20px;">
+                    🤖 Coze 智能体对接
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                const isActive = faqItem.classList.contains('active');
+
+                // 关闭所有FAQ项
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // 如果之前未打开，则打开当前项
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
         });
-        const cozeData = await res.json();
 
-        // 更新会话ID，保持多轮上下文
-        if (cozeData.conversation_id) conversation_id = cozeData.conversation_id;
-
-        // ✅ 有回复显示回复，无回复显示Coze原始数据，绝不提示失败
-        const aiReply = cozeData.answer 
-          ? `🤖 Coze：${cozeData.answer}` 
-          : `✅ 通信成功｜Coze原始数据：${JSON.stringify(cozeData)}`;
-        
-        // 显示Coze回复
-        chatBox.innerHTML += `<div class="ai-msg">${aiReply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-      } catch (err) {
-        // 仅网络问题才显示错误
-        chatBox.innerHTML += `<div class="ai-msg error-msg">❌ 请求失败：${err.message}</div>`;
-      }
-    }
-
-    // ✅ 回车键发送消息（便捷功能）
-    document.getElementById('msg-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendMsg();
-    });
-
-    // ✅ 页面加载完成，自动显示欢迎语
-    window.onload = () => {
-      document.getElementById('chatBox').innerHTML += `<div class="ai-msg">🤖 Coze智能体已就绪，输入消息开始对话吧～</div>`;
-    };
-  </script>
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
